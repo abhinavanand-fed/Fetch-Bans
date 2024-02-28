@@ -17,12 +17,39 @@ client.once('ready', () => {
             }
         ]
     });
+
+    client.application.commands.create({
+        name: 'ping',
+        description: 'Check the bot\'s ping'
+    });
+
 });
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
     const { commandName, options } = interaction;
+
+    if (commandName === 'ping') {
+        const ping = client.ws.ping;
+        let color;
+
+        if (ping < 100) {
+            color = 'GREEN';
+        } else if (ping < 200) {
+            color = 'YELLOW';
+        } else {
+            color = 'RED';
+        }
+
+        const embed = new MessageEmbed()
+            .setTitle('Bot Ping')
+            .setDescription(`The bot's ping is ${ping}ms`)
+            .setColor(color);
+
+        await interaction.reply({ embeds: [embed], ephemeral: false });
+    }
+
 
     if (commandName === 'fetchbans') {
         const guild = interaction.guild;
