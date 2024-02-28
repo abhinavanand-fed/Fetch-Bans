@@ -23,12 +23,47 @@ client.once('ready', () => {
         description: 'Check the bot\'s ping'
     });
 
+    client.application.commands.create({
+        name: 'userinfo',
+        description: 'Show user information based on their Discord user ID',
+        options: [
+            {
+                name: 'user_id',
+                description: 'The Discord user ID',
+                type: 'STRING',
+                required: true
+            }
+        ]
+    });
+
 });
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
-
+    
     const { commandName, options } = interaction;
+
+
+    if (commandName === 'userinfo') {
+        const userId = options.getString('user_id');
+        const user = await client.users.fetch(userId);
+
+        const embed = new MessageEmbed()
+        .setTitle('User Information')
+        .setColor('#7289DA')
+        .addFields(
+            { name: 'Username', value: user.username },
+            { name: 'Discriminator', value: user.discriminator },
+            { name: 'ID', value: user.id }
+        )
+        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+        .setFooter('Requested by ' + interaction.user.tag, interaction.user.displayAvatarURL({ dynamic: true }))
+        .setTimestamp();
+
+        await interaction.reply({ embeds: [embed], ephemeral: false });
+    }
+
+
 
     if (commandName === 'ping') {
         const ping = client.ws.ping;
