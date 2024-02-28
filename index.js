@@ -42,7 +42,7 @@ client.on('interactionCreate', async interaction => {
             const embed = new MessageEmbed()
                 .setTitle(`Banned members with reason '${specificReason}'`)
                 .setColor('#ff0000')
-                .setDescription(`Banned members:\n${specificBans.map(ban => `User: ${ban.user} (${ban.userId}), Reason: ${ban.reason}`).join('\n')}`);
+                .setDescription(`Banned members:\n${specificBans.map(ban => `- User: ${ban.user} (${ban.userId}), Reason: ${ban.reason}`).join('\n')}`);
 
             const row = new MessageActionRow()
                 .addComponents(
@@ -81,6 +81,7 @@ client.on('interactionCreate', async interaction => {
         }
     }
 });
+
 client
     .login(
         process.env.TOKEN
