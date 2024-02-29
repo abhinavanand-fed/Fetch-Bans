@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const { Client, Intents, MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_BANS] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_BANS, Intents.FLAGS.GUILD_MESSAGES] });
 
 client.once('ready', () => {
     console.log('Bot is ready!');
@@ -36,29 +36,84 @@ client.once('ready', () => {
         ]
     });
 
+    /*new cmd*/
+    client.application.commands.create({
+        name: 'report',
+        description: 'Report a player',
+        options: [
+            {
+                name: 'player_id',
+                description: 'The ID of the player',
+                type: 'STRING',
+                required: true
+            },
+            {
+                name: 'player_name',
+                description: 'The name of the player',
+                type: 'STRING',
+                required: true
+            },
+            {
+                name: 'video_link',
+                description: 'Link to the video evidence',
+                type: 'STRING',
+                required: true
+            }
+        ]
+    });
+    /*new cmd*/
+
 });
+
+
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
-    
+
     const { commandName, options } = interaction;
 
+    /*new cmd*/
+    if (commandName === 'report') {
+        const playerId = interaction.options.getString('player_id');
+        const playerName = interaction.options.getString('player_name');
+        const videoLink = interaction.options.getString('video_link');
+
+        // Create a new embed for the report
+        const embed = new MessageEmbed()
+            .setTitle('Report')
+            .setColor('#ff0000')
+            .addFields(
+                { name: 'Submitted by', value: interaction.user.username },
+                { name: 'Player ID', value: playerId },
+                { name: 'Player Name', value: playerName },
+                { name: 'Video Link', value: videoLink }
+            );
+
+        // Send the embed to a different channel
+        const channel = client.channels.cache.get('1189856644805443635'); // Replace CHANNEL_ID with your channel ID
+        if (channel) {
+            channel.send({ embeds: [embed] });
+        }
+
+        await interaction.reply({ content: 'Your report has been sent.', ephemeral: true });
+    }
+    /*new cmd*/
 
     if (commandName === 'userinfo') {
         const userId = options.getString('user_id');
         const user = await client.users.fetch(userId);
 
         const embed = new MessageEmbed()
-        .setTitle('User Information')
-        .setColor('#7289DA')
-        .addFields(
-            { name: 'Username', value: user.username },
-            { name: 'Discriminator', value: user.discriminator },
-            { name: 'ID', value: user.id }
-        )
-        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-        .setFooter('Requested by ' + interaction.user.tag, interaction.user.displayAvatarURL({ dynamic: true }))
-        .setTimestamp();
+            .setTitle('User Information')
+            .setColor('#7289DA')
+            .addFields(
+                { name: 'Username', value: user.username },
+                { name: 'Discriminator', value: user.discriminator },
+                { name: 'ID', value: user.id }
+            )
+            .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+            .setFooter('Requested by ' + interaction.user.tag, interaction.user.displayAvatarURL({ dynamic: true }))
+            .setTimestamp();
 
         await interaction.reply({ embeds: [embed], ephemeral: false });
     }
