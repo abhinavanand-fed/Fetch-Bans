@@ -74,28 +74,63 @@ client.on('interactionCreate', async interaction => {
 
     /*new cmd*/
     if (commandName === 'report') {
-        const playerId = interaction.options.getString('player_id');
-        const playerName = interaction.options.getString('player_name');
-        const videoLink = interaction.options.getString('video_link');
-
-        // Create a new embed for the report
-        const embed = new MessageEmbed()
-            .setTitle('Report')
-            .setColor('#ff0000')
-            .addFields(
-                { name: 'Submitted by', value: interaction.user.username },
-                { name: 'Player ID', value: playerId },
-                { name: 'Player Name', value: playerName },
-                { name: 'Video Link', value: videoLink }
+        const playerId = options.getString('player_id');
+        const playerName = options.getString('player_name');
+        const videoLink = options.getString('video_link');
+    
+        // Create a modal for user input
+        const row = new MessageActionRow()
+            .addComponents(
+                new MessageButton()
+                    .setCustomId('submit_report')
+                    .setLabel('Submit Report')
+                    .setStyle('PRIMARY')
             );
-
-        // Send the embed to a different channel
-        const channel = client.channels.cache.get('1189856644805443635'); // Replace CHANNEL_ID with your channel ID
-        if (channel) {
-            channel.send({ embeds: [embed] });
-        }
-
-        await interaction.reply({ content: 'Your report has been sent.', ephemeral: true });
+    
+        await interaction.reply({
+            content: 'Please confirm the details and submit the report:',
+            ephemeral: true,
+            components: [row],
+            embeds: [
+                new MessageEmbed()
+                    .setTitle('Report Details')
+                    .setColor('#ff0000')
+                    .addFields(
+                        { name: 'Player ID', value: playerId },
+                        { name: 'Player Name', value: playerName },
+                        { name: 'Video Link', value: videoLink }
+                    )
+            ]
+        });
+    
+        const filter = i => i.customId === 'submit_report' && i.user.id === interaction.user.id;
+        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
+    
+        collector.on('collect', async i => {
+            const reportEmbed = new MessageEmbed()
+                .setTitle('Report')
+                .setColor('#ff0000')
+                .addFields(
+                    { name: 'Submitted by', value: interaction.user.username },
+                    { name: 'Player ID', value: playerId },
+                    { name: 'Player Name', value: playerName },
+                    { name: 'Video Link', value: videoLink }
+                );
+    
+            const channel = client.channels.cache.get('1189856644805443635'); // Channel ID where reports should be sent
+            if (channel && channel.isText()) {
+                channel.send({ embeds: [reportEmbed] });
+            }
+    
+            await i.update({ content: 'Your report has been submitted.', embeds: [], components: [] });
+            collector.stop();
+        });
+    
+        collector.on('end', collected => {
+            if (collected.size === 0) {
+                interaction.editReply({ content: 'Report submission timed out.', embeds: [], components: [] });
+            }
+        });
     }
     /*new cmd*/
 
