@@ -36,7 +36,7 @@ client.once('ready', () => {
         ]
     });
 
-    /*new cmd*/
+
     client.application.commands.create({
         name: 'report',
         description: 'Report a player',
@@ -61,7 +61,11 @@ client.once('ready', () => {
             }
         ]
     });
-    /*new cmd*/
+    client.application.commands.create({
+        name: 'help',
+        description: 'Display the list of available commands',
+    });
+
 
 });
 
@@ -72,12 +76,31 @@ client.on('interactionCreate', async interaction => {
 
     const { commandName, options } = interaction;
 
+    if (commandName === 'help') {
+        // Create a list of commands and their descriptions
+        const commands = [
+            { name: 'fetchbans', description: 'Fetches banned members with a specific reason' },
+            { name: 'ping', description: 'Check the bot\'s ping' },
+            { name: 'userinfo', description: 'Show user information based on their Discord user ID' },
+            { name: 'report', description: 'Report a player' },
+            // Add more commands here
+        ];
+
+        // Create an embed to display the help information
+        const embed = new MessageEmbed()
+            .setTitle('Available Commands')
+            .setColor('#7289DA')
+            .setDescription(commands.map(cmd => `**/${cmd.name}**: ${cmd.description}`).join('\n'));
+
+        await interaction.reply({ embeds: [embed], ephemeral: true });
+    }
+
     /*new cmd*/
     if (commandName === 'report') {
         const playerId = options.getString('player_id');
         const playerName = options.getString('player_name');
         const videoLink = options.getString('video_link');
-    
+
         // Create a modal for user input
         const row = new MessageActionRow()
             .addComponents(
@@ -86,7 +109,7 @@ client.on('interactionCreate', async interaction => {
                     .setLabel('Submit Report')
                     .setStyle('PRIMARY')
             );
-    
+
         await interaction.reply({
             content: 'Please confirm the details and submit the report:',
             ephemeral: true,
@@ -102,10 +125,10 @@ client.on('interactionCreate', async interaction => {
                     )
             ]
         });
-    
+
         const filter = i => i.customId === 'submit_report' && i.user.id === interaction.user.id;
         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
-    
+
         collector.on('collect', async i => {
             const reportEmbed = new MessageEmbed()
                 .setTitle('Report')
@@ -116,16 +139,16 @@ client.on('interactionCreate', async interaction => {
                     { name: 'Player Name', value: playerName },
                     { name: 'Video Link', value: videoLink }
                 );
-    
+
             const channel = client.channels.cache.get('1189856644805443635'); // Channel ID where reports should be sent
             if (channel && channel.isText()) {
                 channel.send({ embeds: [reportEmbed] });
             }
-    
+
             await i.update({ content: 'Your report has been submitted.', embeds: [], components: [] });
             collector.stop();
         });
-    
+
         collector.on('end', collected => {
             if (collected.size === 0) {
                 interaction.editReply({ content: 'Report submission timed out.', embeds: [], components: [] });
