@@ -82,7 +82,7 @@ client.once('ready', () => {
 
 });
 
-const feedbackChannelId = '1189856644805443635';
+
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
@@ -91,15 +91,21 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'feedback') {
         const feedbackMessage = options.getString('message');
-
-        // Get the channel to send the feedback
-        const channel = await interaction.client.channels.fetch(feedbackChannelId);
-
-        // Send the feedback message to the channel
-        if (channel && channel.isText()) {
-            await channel.send(`Feedback from ${interaction.user.username}: ${feedbackMessage}`);
-            await interaction.reply('Thank you for your feedback!', { ephemeral: true });
-        } else {
+        const feedbackChannelId = '1189856644805443635'; // Replace with your channel ID
+    
+        try {
+            // Get the channel to send the feedback
+            const channel = await interaction.client.channels.fetch(feedbackChannelId);
+    
+            // Send the feedback message to the channel
+            if (channel && channel.isText()) {
+                await channel.send(`Feedback from ${interaction.user.username}: ${feedbackMessage}`);
+                await interaction.reply('Thank you for your feedback!', { ephemeral: true });
+            } else {
+                await interaction.reply('Failed to send feedback. Please try again later.', { ephemeral: true });
+            }
+        } catch (error) {
+            console.error('Error fetching or sending feedback:', error);
             await interaction.reply('Failed to send feedback. Please try again later.', { ephemeral: true });
         }
     }
