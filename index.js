@@ -83,7 +83,6 @@ client.once('ready', () => {
 });
 
 
-
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
@@ -209,9 +208,7 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.reply({ embeds: [embed], ephemeral: false });
     }
-
-
-
+    
     if (commandName === 'ping') {
         const ping = client.ws.ping;
         let color;
@@ -231,8 +228,7 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.reply({ embeds: [embed], ephemeral: false });
     }
-
-
+    
     if (commandName === 'fetchbans') {
         const guild = interaction.guild;
         const bans = await guild.bans.fetch();
@@ -289,7 +285,10 @@ client.on('interactionCreate', async interaction => {
             await interaction.reply(`No banned members found with reason '${specificReason}'.`, { ephemeral: false }).catch(console.error);
         }
     }
+
 });
+
+
 
 client
     .login(
