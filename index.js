@@ -61,20 +61,48 @@ client.once('ready', () => {
             }
         ]
     });
+    
     client.application.commands.create({
         name: 'help',
         description: 'Display the list of available commands',
     });
 
+    client.application.commands.create({
+        name: 'feedback',
+        description: 'Submit feedback about the bot',
+        options: [
+            {
+                name: 'message',
+                description: 'Your feedback message',
+                type: 'STRING',
+                required: true
+            }
+        ]
+    });
 
 });
 
-
+const feedbackChannelId = '1189856644805443635';
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
     const { commandName, options } = interaction;
+
+    if (commandName === 'feedback') {
+        const feedbackMessage = options.getString('message');
+
+        // Get the channel to send the feedback
+        const channel = await interaction.client.channels.fetch(feedbackChannelId);
+
+        // Send the feedback message to the channel
+        if (channel && channel.isText()) {
+            await channel.send(`Feedback from ${interaction.user.username}: ${feedbackMessage}`);
+            await interaction.reply('Thank you for your feedback!', { ephemeral: true });
+        } else {
+            await interaction.reply('Failed to send feedback. Please try again later.', { ephemeral: true });
+        }
+    }
 
     if (commandName === 'help') {
         // Create a list of commands and their descriptions
