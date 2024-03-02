@@ -53,4 +53,13 @@ const rest = new REST().setToken(TOKEN);
 rest.delete(Routes.applicationCommand(CLIENT_ID, 'commandId'))
 	.then(() => console.log('Successfully deleted application command'))
 	.catch(console.error);*/
+
+    /*rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: [] })
+	.then(() => console.log('Successfully deleted all guild commands.'))
+	.catch(console.error);
+
+// for global commands
+rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] })
+	.then(() => console.log('Successfully deleted all application commands.'))
+	.catch(console.error);*/
 })();
